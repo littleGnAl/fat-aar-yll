@@ -1,0 +1,58 @@
+apply plugin: 'maven-publish'
+
+def isReleaseBuild() {
+  return VERSION_NAME.contains("SNAPSHOT") == false
+}
+
+def getReleaseRepositoryUrl() {
+  return hasProperty('RELEASE_REPOSITORY_URL') ? RELEASE_REPOSITORY_URL : ""
+}
+
+def getSnapshotRepositoryUrl() {
+  return hasProperty('SNAPSHOT_REPOSITORY_URL') ? SNAPSHOT_REPOSITORY_URL : ""
+}
+
+def getRepositoryUsername() {
+  return hasProperty('NEXUS_USERNAME') ? NEXUS_USERNAME : ""
+}
+
+def getRepositoryPassword() {
+  return hasProperty('NEXUS_PASSWORD') ? NEXUS_PASSWORD : ""
+}
+
+def getRepositoryGroup() {
+  return hasProperty("GROUP") ? GROUP : ""
+}
+
+def getRepositoryArtifactId() {
+  return hasProperty("ARTIFACT_ID") ? ARTIFACT_ID : ""
+}
+
+def getVersionName() {
+  return hasProperty("VERSION_NAME") ? VERSION_NAME : ""
+}
+
+def getRepositoryUrl() {
+  return isReleaseBuild() ? getReleaseRepositoryUrl() : getSnapshotRepositoryUrl()
+}
+
+publishing {
+  publications {
+    nexus(MavenPublication) {
+      from components.java
+      groupId getRepositoryGroup()
+      artifactId getRepositoryArtifactId()
+      version getVersionName()
+    }
+  }
+  repositories {
+    maven {
+      credentials {
+        username getRepositoryUsername()
+        password getRepositoryPassword()
+      }
+
+      url getRepositoryUrl()
+    }
+  }
+}
